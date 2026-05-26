@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>H2V-TRACE Dashboard</title>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, sans-serif;
+    }
+
+    body{
+      background:#020b16;
+      color:white;
+      display:flex;
+      min-height:100vh;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar{
+      width:260px;
+      background:#04101f;
+      padding:20px;
+      border-right:1px solid #0b2c47;
+    }
+
+    .logo{
+      color:#2df06d;
+      font-size:32px;
+      font-weight:bold;
+      margin-bottom:5px;
+    }
+
+    .subtitle{
+      font-size:12px;
+      color:#8ca7c4;
+      margin-bottom:40px;
+    }
+
+    .menu{
+      list-style:none;
+    }
+
+    .menu li{
+      padding:15px;
+      margin-bottom:10px;
+      border-radius:12px;
+      cursor:pointer;
+      transition:0.3s;
+      color:#d8e5f1;
+    }
+
+    .menu li:hover,
+    .menu .active{
+      background:#07281d;
+      border:1px solid #1eff70;
+      color:#1eff70;
+    }
+
+    .status{
+      margin-top:40px;
+      padding:20px;
+      background:#061827;
+      border-radius:16px;
+      border:1px solid #12344e;
+    }
+
+    .online{
+      color:#1eff70;
+      font-weight:bold;
+      margin-bottom:10px;
+    }
+
+    /* MAIN */
+
+    .main{
+      flex:1;
+      padding:25px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:25px;
+    }
+
+    .title h1{
+      font-size:34px;
+    }
+
+    .title p{
+      color:#8ca7c4;
+      margin-top:5px;
+    }
+
+    .top-info{
+      display:flex;
+      gap:25px;
+      color:#d4e4f5;
+    }
+
+    /* CARDS */
+
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:20px;
+      margin-bottom:20px;
+    }
+
+    .card{
+      background:#071726;
+      padding:20px;
+      border-radius:18px;
+      border:1px solid #12344e;
+      box-shadow:0 0 15px rgba(0,255,100,0.08);
+    }
+
+    .card h3{
+      font-size:15px;
+      color:#9db5cb;
+      margin-bottom:15px;
+    }
+
+    .card .value{
+      font-size:42px;
+      font-weight:bold;
+      margin-bottom:10px;
+    }
+
+    .green{
+      color:#1eff70;
+    }
+
+    /* GRID */
+
+    .dashboard-grid{
+      display:grid;
+      grid-template-columns:2fr 1fr;
+      gap:20px;
+    }
+
+    .chart{
+      background:#071726;
+      border-radius:18px;
+      padding:20px;
+      border:1px solid #12344e;
+      height:320px;
+    }
+
+    .chart-box{
+      width:100%;
+      height:220px;
+      margin-top:20px;
+      border-radius:12px;
+      background:linear-gradient(
+        to top,
+        rgba(0,255,100,0.2),
+        transparent
+      );
+      position:relative;
+      overflow:hidden;
+    }
+
+    .line{
+      position:absolute;
+      width:100%;
+      height:100%;
+      background:
+      linear-gradient(
+        to right,
+        transparent 0%,
+        #1eff70 50%,
+        transparent 100%
+      );
+      clip-path: polygon(
+        0% 80%,
+        10% 75%,
+        20% 65%,
+        30% 60%,
+        40% 55%,
+        50% 70%,
+        60% 50%,
+        70% 45%,
+        80% 35%,
+        90% 40%,
+        100% 20%
+      );
+    }
+
+    /* STATUS */
+
+    .status-box{
+      background:#071726;
+      border-radius:18px;
+      padding:20px;
+      border:1px solid #12344e;
+    }
+
+    .equipment{
+      display:flex;
+      justify-content:space-between;
+      padding:15px 0;
+      border-bottom:1px solid #11314a;
+    }
+
+    .equipment:last-child{
+      border:none;
+    }
+
+    .running{
+      color:#1eff70;
+    }
+
+    /* FOOTER */
+
+    .footer{
+      margin-top:20px;
+      display:grid;
+      grid-template-columns:2fr 1fr;
+      gap:20px;
+    }
+
+    .footer-card{
+      background:#071726;
+      padding:20px;
+      border-radius:18px;
+      border:1px solid #12344e;
+    }
+
+    .qr{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:150px;
+      background:white;
+      color:black;
+      border-radius:10px;
+      margin-top:15px;
+      font-weight:bold;
+    }
+
+    @media(max-width:1200px){
+      .cards{
+        grid-template-columns:repeat(2,1fr);
+      }
+
+      .dashboard-grid,
+      .footer{
+        grid-template-columns:1fr;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+
+  <div class="sidebar">
+
+    <div class="logo">H2V-TRACE</div>
+    <div class="subtitle">
+      Plataforma Inteligente para Hidrogênio Verde
+    </div>
+
+    <ul class="menu">
+      <li class="active">Dashboard</li>
+      <li>Produção</li>
+      <li>Energia</li>
+      <li>Equipamentos</li>
+      <li>Lotes e Rastreabilidade</li>
+      <li>Certificados</li>
+      <li>Relatórios ESG</li>
+      <li>Alertas</li>
+      <li>Configurações</li>
+      <li>Usuários</li>
+    </ul>
+
+    <div class="status">
+      <div class="online">● Sistema Online</div>
+      <p>Todos os sistemas operando normalmente.</p>
+    </div>
+
+  </div>
+
+  <!-- MAIN -->
+
+  <div class="main">
+
+    <div class="topbar">
+
+      <div class="title">
+        <h1>DASHBOARD</h1>
+        <p>Visão geral da produção de Hidrogênio Verde</p>
+      </div>
+
+      <div class="top-info">
+        <div>☀ 26°C</div>
+        <div>📅 23/05/2025</div>
+        <div>🕒 10:45:32</div>
+      </div>
+
+    </div>
+
+    <!-- CARDS -->
+
+    <div class="cards">
+
+      <div class="card">
+        <h3>PRODUÇÃO ATUAL</h3>
+        <div class="value">120,5</div>
+        <p>kg/h de H₂ produzido</p>
+      </div>
+
+      <div class="card">
+        <h3>PRODUÇÃO DIÁRIA</h3>
+        <div class="value">2.892</div>
+        <p>Meta: 3.500 kg</p>
+      </div>
+
+      <div class="card">
+        <h3>EFICIÊNCIA ENERGÉTICA</h3>
+        <div class="value green">91%</div>
+        <p>Excelente</p>
+      </div>
+
+      <div class="card">
+        <h3>CONSUMO DE ENERGIA</h3>
+        <div class="value">4,28</div>
+        <p>MWh</p>
+      </div>
+
+      <div class="card">
+        <h3>EMISSÃO EVITADA</h3>
+        <div class="value green">5,62 t</div>
+        <p>CO₂ hoje</p>
+      </div>
+
+    </div>
+
+    <!-- GRID -->
+
+    <div class="dashboard-grid">
+
+      <div class="chart">
+
+        <h2>Produção de Hidrogênio</h2>
+
+        <div class="chart-box">
+          <div class="line"></div>
+        </div>
+
+      </div>
+
+      <div class="status-box">
+
+        <h2>Status dos Equipamentos</h2>
+
+        <div class="equipment">
+          <span>Eletrolisador 01</span>
+          <span class="running">Operando</span>
+        </div>
+
+        <div class="equipment">
+          <span>Eletrolisador 02</span>
+          <span class="running">Operando</span>
+        </div>
+
+        <div class="equipment">
+          <span>Sistema de Resfriamento</span>
+          <span class="running">Operando</span>
+        </div>
+
+        <div class="equipment">
+          <span>Compressor H₂</span>
+          <span class="running">Operando</span>
+        </div>
+
+        <div class="equipment">
+          <span>Tanque de Armazenamento</span>
+          <span class="running">Operando</span>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+
+    <div class="footer">
+
+      <div class="footer-card">
+        <h2>Rastreabilidade e Certificação</h2>
+        <p style="margin-top:15px;color:#9db5cb;">
+          Todos os lotes possuem rastreabilidade completa da origem
+          da energia e condições de produção.
+        </p>
+      </div>
+
+      <div class="footer-card">
+        <h2>QR Code</h2>
+
+        <div class="qr">
+          QR CODE
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>
